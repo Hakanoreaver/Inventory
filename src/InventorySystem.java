@@ -13,23 +13,68 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
     int[] yCords;
     int offsetX, offsetY, takenX, takenY;
     int dragCount = 0;
+    int spriteSize;
+    int rowNum;
+    int colNum;
 
     public InventorySystem(int heightGap, int widthGap, int rowNum, int colNum, int spriteSize) {
-        this.setLayout(null);
-        this.setFocusable(true);
-        setSize(225,170);
-        doMath(heightGap,widthGap,rowNum,colNum,spriteSize);
+        setUp(spriteSize,rowNum, colNum);
+        doMathMakeSize(heightGap,widthGap,rowNum,colNum,spriteSize);
+        repaint();
+    }
+
+    public InventorySystem(int xSize, int ySize, int rowNum, int colNum, int spriteSize, int useless) {
+        setUp(spriteSize, rowNum, colNum);
+        doMathSetSize(xSize, ySize, rowNum, colNum, spriteSize);
         initInventory(rowNum, colNum);
         setPositions(rowNum, colNum);
         repaint();
-        addMouseListener(this);
-        addMouseMotionListener(this);
     }
 
-    private void doMath(int heightGap, int widthGap, int rowNum, int colNum, int spriteSize) {
+    private void setUp(int spriteSize, int rowNum, int colNum) {
+        this.spriteSize = spriteSize;
+        this.rowNum = rowNum;
+        this.colNum = colNum;
+        this.setLayout(null);
+        this.setFocusable(true);
+        addMouseListener(this);
+        addMouseMotionListener(this);
+
+    }
+
+    private void doMathMakeSize(int heightGap, int widthGap, int rowNum, int colNum, int spriteSize) {
         int xSize, ySize;
         xSize = widthGap * colNum + spriteSize * colNum + widthGap;
         ySize = heightGap * rowNum + spriteSize * rowNum + heightGap;
+        xCords = new int[colNum];
+        yCords = new int[rowNum];
+        for (int i = 0; i < colNum; i++) {
+            if (i == 0) {
+                xCords[i] = widthGap;
+            }
+            else {
+                xCords[i] = xCords[i - 1] + widthGap + spriteSize;
+            }
+        }
+        for (int i = 0; i < rowNum; i++) {
+            if (i == 0) {
+                yCords[i] = heightGap;
+            }
+            else {
+                yCords[i] = yCords[i - 1] + heightGap + spriteSize;
+            }
+        }
+        setSize(xSize,ySize);
+
+        initInventory(rowNum, colNum);
+        setPositions(rowNum, colNum);
+    }
+
+    private void doMathSetSize(int xSize, int ySize, int rowNum, int colNum, int spriteSize) {
+        setSize(xSize,ySize);
+        int widthGap = (xSize - colNum * spriteSize) / (colNum + 1);
+        int heightGap = (ySize - rowNum * spriteSize) / (rowNum + 1);
+
         xCords = new int[colNum];
         yCords = new int[rowNum];
         for (int i = 0; i < colNum; i++) {
@@ -53,7 +98,7 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
 
     private void initInventory(int rowNum, int colNum) {
         items = new ArrayList<>();
-        for (int i = 0; i < rowNum * colNum; i++) {
+        for (int i = 0; i < 12; i++) {
             String s = "Resources/image" + ".png";
 
             items.add(new Item(0, 0,s));
@@ -62,12 +107,16 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
 
     private void setPositions(int rowNum, int colNum) {
         int count = 0;
-        for (int i = 0; i < rowNum; i++) {
-            for (int x = 0; x < colNum; x++) {
-                items.get(count).x = xCords[x];
-                items.get(count).y = yCords[i];
-                count++;
+        try {
+            for (int i = 0; i < rowNum; i++) {
+                for (int x = 0; x < colNum; x++) {
+                    items.get(count).x = xCords[x];
+                    items.get(count).y = yCords[i];
+                    count++;
+                }
             }
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
         }
     }
 
@@ -81,7 +130,14 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
 
     private void drawObjects(Graphics g) {
         for (Item i : items) {
-            g.drawImage(i.getImage(), i.getX(), i.getY(), this);
+            if (i != dragging) {
+                g.setColor(i.getColor());
+                g.fillRect(i.getX(), i.getY(), spriteSize, spriteSize);
+            }
+        }
+        if (dragging != null) {
+            g.setColor(dragging.getColor());
+            g.fillRect(dragging.getX(), dragging.getY(), spriteSize, spriteSize);
         }
     }
 
@@ -102,8 +158,8 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
     public void mouseReleased(MouseEvent e) {
 
         try {
-            for (int i = 0; i < 3; i++) {
-                for (int x = 0; x < 4; x++) {
+            for (int i = 0; i < rowNum; i++) {
+                for (int x = 0; x < colNum; x++) {
                     if (e.getX() < xCords[x] + 30 && e.getX() > xCords[x] - 30) {
                         if (e.getY() < yCords[i] + 30 && e.getY() > yCords[i] - 30) {
                             for (Item t : items) {
@@ -117,13 +173,21 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
                                     dragg.y = takenY;
                                     dragging = null;
                                     dragCount = 0;
+                                    repaint();
                                     return;
                                 }
                             }
+                            dragging.x = xCords[x];
+                            dragging.y = yCords[i];
+                            System.out.println("Here");
+                            repaint();
+                            return;
                         }
                     } else {
                         dragging.x = takenX;
                         dragging.y = takenY;
+                        System.out.println("Here 2");
+                        repaint();
                     }
                 }
             }

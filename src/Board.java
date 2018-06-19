@@ -9,7 +9,8 @@ public class Board extends JPanel implements ActionListener {
     public final int B_WIDTH = 200;
     public final int B_HEIGHT = 200;
     private final int DELAY = 40;
-    InventorySystem p = new InventorySystem(1,1,4,4,20);
+
+    InventorySystem p = new InventorySystem(400,400,9,9,20,0);
 
     public Board() {
         initBoard();
@@ -21,7 +22,7 @@ public class Board extends JPanel implements ActionListener {
         ingame = true;
         setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
         this.setLayout(null);
-        p.setLocation(0,200);
+        p.setLocation(0,0);
         this.add(p);
         timer = new Timer(DELAY, this);
         timer.start();
@@ -47,6 +48,5 @@ public class Board extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        repaint();
     }
 }
