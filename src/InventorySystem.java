@@ -9,36 +9,61 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
 
     ArrayList<Item> items;
     Item dragging;
-    boolean drag = false;
-    int[] xCords = {20, 75, 130, 185};
-    int[] yCords = {20, 75, 130};
+    int[] xCords;
+    int[] yCords;
     int offsetX, offsetY, takenX, takenY;
     int dragCount = 0;
 
-    public InventorySystem() {
+    public InventorySystem(int heightGap, int widthGap, int rowNum, int colNum, int spriteSize) {
         this.setLayout(null);
         this.setFocusable(true);
         setSize(225,170);
-        initInventory();
-        setPositions();
+        doMath(heightGap,widthGap,rowNum,colNum,spriteSize);
+        initInventory(rowNum, colNum);
+        setPositions(rowNum, colNum);
         repaint();
         addMouseListener(this);
         addMouseMotionListener(this);
     }
 
-    private void initInventory() {
+    private void doMath(int heightGap, int widthGap, int rowNum, int colNum, int spriteSize) {
+        int xSize, ySize;
+        xSize = widthGap * colNum + spriteSize * colNum + widthGap;
+        ySize = heightGap * rowNum + spriteSize * rowNum + heightGap;
+        xCords = new int[colNum];
+        yCords = new int[rowNum];
+        for (int i = 0; i < colNum; i++) {
+            if (i == 0) {
+                xCords[i] = widthGap;
+            }
+            else {
+                xCords[i] = xCords[i - 1] + widthGap + spriteSize;
+            }
+        }
+        for (int i = 0; i < rowNum; i++) {
+            if (i == 0) {
+                yCords[i] = heightGap;
+            }
+            else {
+                yCords[i] = yCords[i - 1] + heightGap + spriteSize;
+            }
+        }
+        setSize(xSize,ySize);
+    }
+
+    private void initInventory(int rowNum, int colNum) {
         items = new ArrayList<>();
-        for (int i = 0; i < 12; i++) {
-            String s = "Resources/image" + (i+1) + ".png";
+        for (int i = 0; i < rowNum * colNum; i++) {
+            String s = "Resources/image" + ".png";
 
             items.add(new Item(0, 0,s));
         }
     }
 
-    private void setPositions() {
+    private void setPositions(int rowNum, int colNum) {
         int count = 0;
-        for (int i = 0; i < 3; i++) {
-            for (int x = 0; x < 4; x++) {
+        for (int i = 0; i < rowNum; i++) {
+            for (int x = 0; x < colNum; x++) {
                 items.get(count).x = xCords[x];
                 items.get(count).y = yCords[i];
                 count++;
