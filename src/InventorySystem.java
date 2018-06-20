@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class InventorySystem extends JPanel implements MouseListener, MouseMotionListener {
 
-    ArrayList<Item> items;
+    Item[]  items;
     Item dragging;
     int[] xCords;
     int[] yCords;
@@ -20,13 +20,18 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
     public InventorySystem(int heightGap, int widthGap, int rowNum, int colNum, int spriteSize) {
         setUp(spriteSize,rowNum, colNum);
         doMathMakeSize(heightGap,widthGap,rowNum,colNum,spriteSize);
+
         repaint();
     }
 
     public InventorySystem(int xSize, int ySize, int rowNum, int colNum, int spriteSize, int useless) {
         setUp(spriteSize, rowNum, colNum);
         doMathSetSize(xSize, ySize, rowNum, colNum, spriteSize);
-        initInventory(rowNum, colNum);
+        //initInventory(rowNum, colNum);
+        addItem("String", "Resources/ItemImages/Sword80.png");
+        addItem("String", "Resources/ItemImages/ManaPotion80.png");
+        addItem("String", "Resources/ItemImages/HealthPotion80.png");
+        addItem("String", "Resources/ItemImages/Shield80.png");
         setPositions(rowNum, colNum);
         repaint();
         for (int t : xCords) System.out.println("X " + t);
@@ -34,6 +39,7 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
     }
 
     private void setUp(int spriteSize, int rowNum, int colNum) {
+        items = new Item[rowNum * colNum];
         this.spriteSize = spriteSize;
         this.rowNum = rowNum;
         this.colNum = colNum;
@@ -68,7 +74,8 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
         }
         setSize(xSize,ySize);
 
-        initInventory(rowNum, colNum);
+        //initInventory(rowNum, colNum);
+        addItem("String", "Resources/ItemImages/Sword80.png");
         setPositions(rowNum, colNum);
     }
 
@@ -99,12 +106,6 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
     }
 
     private void initInventory(int rowNum, int colNum) {
-        items = new ArrayList<>();
-        for (int i = 0; i < colNum * rowNum; i++) {
-            String s = "Resources/image" + ".png";
-
-            items.add(new Item(0, 0,s));
-        }
     }
 
     private void setPositions(int rowNum, int colNum) {
@@ -112,13 +113,15 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
         try {
             for (int i = 0; i < rowNum; i++) {
                 for (int x = 0; x < colNum; x++) {
-                    items.get(count).x = xCords[x];
-                    items.get(count).y = yCords[i];
+                    items[count].x = xCords[x];
+                    items[count].y = yCords[i];
                     count++;
                 }
             }
         } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
+        }
+        catch (NullPointerException e) {
+
         }
     }
 
@@ -132,26 +135,26 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
 
     private void drawObjects(Graphics g) {
         for (Item i : items) {
-            if (i != dragging) {
-                g.setColor(i.getColor());
-                g.fillRect(i.getX(), i.getY(), spriteSize, spriteSize);
+            if (i != dragging && i != null) {
+                g.drawImage(i.getImage(),i.getX(),i.getY(),this);
             }
         }
         if (dragging != null) {
-            g.setColor(dragging.getColor());
-            g.fillRect(dragging.getX(), dragging.getY(), spriteSize, spriteSize);
+            g.drawImage(dragging.getImage(),dragging.getX(),dragging.getY(),this);
         }
     }
 
     public void mousePressed(MouseEvent e) {
         for (Item i : items) {
-            Rectangle r = new Rectangle(i.getX() , i.getY()  , spriteSize, spriteSize);
-            if (r.contains(e.getX(),e.getY())) {
-                offsetX = e.getX() - i.getX();
-                offsetY = e.getY() - i.getY();
-                takenX = i.getX();
-                takenY = i.getY();
-                dragging = i;
+            if (i != null) {
+                Rectangle r = new Rectangle(i.getX(), i.getY(), spriteSize, spriteSize);
+                if (r.contains(e.getX(), e.getY())) {
+                    offsetX = e.getX() - i.getX();
+                    offsetY = e.getY() - i.getY();
+                    takenX = i.getX();
+                    takenY = i.getY();
+                    dragging = i;
+                }
             }
         }
     }
@@ -164,27 +167,28 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
                     if (e.getX() < xCords[x] + spriteSize && e.getX() > xCords[x] - spriteSize) {
                         if (e.getY() < yCords[i] + spriteSize && e.getY() > yCords[i] - spriteSize*2) {
                             for (Item t : items) {
-                               // Rectangle p = t.getBounds();
-                                Rectangle p = new Rectangle(t.getX() - 1, t.getY() -1 , spriteSize, spriteSize);
-                                if (p.contains(xCords[x], yCords[i]) && t != dragging && swapped == false) {
-                                    Item dragg = t;
-                                    if (dragging != null) {
-                                        dragging.x = xCords[x];
-                                    dragging.y = yCords[i];
-                                    dragg.x = takenX;
-                                    dragg.y = takenY;
-                                    dragging = null;
-                                    dragCount = 0;
-                                    repaint();
-                                        swapped = true;
-                                    return;
-                                }
+                                // Rectangle p = t.getBounds();
+                                if (t != null) {
+                                    Rectangle p = new Rectangle(t.getX() - 1, t.getY() - 1, spriteSize, spriteSize);
+                                    if (p.contains(xCords[x], yCords[i]) && t != dragging && swapped == false) {
+                                        Item dragg = t;
+                                        if (dragging != null) {
+                                            dragging.x = xCords[x];
+                                            dragging.y = yCords[i];
+                                            dragg.x = takenX;
+                                            dragg.y = takenY;
+                                            dragging = null;
+                                            dragCount = 0;
+                                            repaint();
+                                            swapped = true;
+                                            return;
+                                        }
+                                    }
                                 }
                             }
                             if (dragging != null && swapped == false) {
                                 dragging.x = xCords[x];
                                 dragging.y = yCords[i];
-                                System.out.println("Taking Place");
                                 repaint();
                                 return;
                             }
@@ -223,6 +227,28 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
         }
         if (e.getButton() == MouseEvent.BUTTON3) {
             System.out.println("Right Click");
+        }
+    }
+
+    public void addItem(String itemDescription, String itemImage) {
+        Item a = new Item(itemDescription, itemImage);
+        for (int i = 0 ; i < items.length; i++) {
+            if (items[i] == null) {
+                items[i] = a;
+                a = null;
+            }
+        }
+
+        for(Item i : items) {
+            System.out.println(i);
+        }
+    }
+
+    public void removeItem(String itemDescription, int amount) {
+        for (int i = 0; i < amount; i++) {
+            if (items[i] != null && items[i].itemDescription == itemDescription) {
+                items[i] = null;
+            }
         }
     }
 
