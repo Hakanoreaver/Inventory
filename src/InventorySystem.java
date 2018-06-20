@@ -29,6 +29,8 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
         initInventory(rowNum, colNum);
         setPositions(rowNum, colNum);
         repaint();
+        for (int t : xCords) System.out.println("X " + t);
+        for (int t : yCords) System.out.println("Y " + t);
     }
 
     private void setUp(int spriteSize, int rowNum, int colNum) {
@@ -98,7 +100,7 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
 
     private void initInventory(int rowNum, int colNum) {
         items = new ArrayList<>();
-        for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < colNum * rowNum; i++) {
             String s = "Resources/image" + ".png";
 
             items.add(new Item(0, 0,s));
@@ -143,58 +145,61 @@ public class InventorySystem extends JPanel implements MouseListener, MouseMotio
 
     public void mousePressed(MouseEvent e) {
         for (Item i : items) {
-            Rectangle r = i.getBounds();
+            Rectangle r = new Rectangle(i.getX() , i.getY()  , spriteSize, spriteSize);
             if (r.contains(e.getX(),e.getY())) {
                 offsetX = e.getX() - i.getX();
                 offsetY = e.getY() - i.getY();
                 takenX = i.getX();
                 takenY = i.getY();
                 dragging = i;
-                System.out.println(dragging.ID);
             }
         }
     }
 
     public void mouseReleased(MouseEvent e) {
 
-        try {
+            boolean swapped = false;
             for (int i = 0; i < rowNum; i++) {
                 for (int x = 0; x < colNum; x++) {
-                    if (e.getX() < xCords[x] + 30 && e.getX() > xCords[x] - 30) {
-                        if (e.getY() < yCords[i] + 30 && e.getY() > yCords[i] - 30) {
+                    if (e.getX() < xCords[x] + spriteSize && e.getX() > xCords[x] - spriteSize) {
+                        if (e.getY() < yCords[i] + spriteSize && e.getY() > yCords[i] - spriteSize*2) {
                             for (Item t : items) {
-                                Rectangle p = t.getBounds();
-                                if (p.contains(xCords[x], yCords[i]) && t != dragging) {
+                               // Rectangle p = t.getBounds();
+                                Rectangle p = new Rectangle(t.getX() - 1, t.getY() -1 , spriteSize, spriteSize);
+                                if (p.contains(xCords[x], yCords[i]) && t != dragging && swapped == false) {
                                     Item dragg = t;
-                                    System.out.println(t.ID);
-                                    dragging.x = xCords[x];
+                                    if (dragging != null) {
+                                        dragging.x = xCords[x];
                                     dragging.y = yCords[i];
                                     dragg.x = takenX;
                                     dragg.y = takenY;
                                     dragging = null;
                                     dragCount = 0;
                                     repaint();
+                                        swapped = true;
                                     return;
                                 }
+                                }
                             }
-                            dragging.x = xCords[x];
-                            dragging.y = yCords[i];
-                            System.out.println("Here");
-                            repaint();
-                            return;
+                            if (dragging != null && swapped == false) {
+                                dragging.x = xCords[x];
+                                dragging.y = yCords[i];
+                                System.out.println("Taking Place");
+                                repaint();
+                                return;
+                            }
                         }
                     } else {
-                        dragging.x = takenX;
-                        dragging.y = takenY;
-                        System.out.println("Here 2");
-                        repaint();
+                        if (swapped ==  false) {
+                            dragging.x = takenX;
+                            dragging.y = takenY;
+                            repaint();
+                        }
                     }
                 }
             }
-        } catch (NullPointerException i) {
-
         }
-    }
+
 
 
     public void mouseEntered(MouseEvent e) {

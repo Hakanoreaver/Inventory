@@ -10,7 +10,7 @@ public class Board extends JPanel implements ActionListener {
     public final int B_HEIGHT = 200;
     private final int DELAY = 40;
 
-    InventorySystem p = new InventorySystem(400,400,9,9,20,0);
+    InventorySystem p = new InventorySystem(500,500,4,4,80,0);
 
     public Board() {
         initBoard();
