@@ -12,7 +12,7 @@ public class Main extends JFrame{
 
     private void initUI() {
         this.add(new Board());
-        setSize(500, 500);
+        setSize(1920, 1080);
         setResizable(false);
         setTitle("Display a White Circle");
         setLocationRelativeTo(null);
